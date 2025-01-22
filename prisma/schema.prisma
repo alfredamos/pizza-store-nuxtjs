@@ -1,0 +1,102 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model CartItem {
+  id       String  @id @default(uuid())
+  name     String
+  price    Float
+  quantity Int
+  pizzaId  String?
+  orderId  String?
+  image    String
+  pizza    Pizza?  @relation(fields: [pizzaId], references: [id])
+  order    Order?  @relation(fields: [orderId], references: [id])
+
+  @@map("cartItems")
+}
+
+model User {
+  id       String  @id @default(uuid())
+  name     String  @db.VarChar(255)
+  email    String  @unique @db.VarChar(255)
+  phone    String  @db.VarChar(255)
+  image    String? @db.VarChar(255)
+  gender   Gender  @default(Male)
+  password String  @db.VarChar(255)
+  role     Role    @default(User)
+  orders   Order[]
+  address  String? @db.Text
+  pizzas   Pizza[]
+
+  @@map("users")
+}
+
+model Order {
+  id            String     @id @default(uuid())
+  paymentId     String     @unique @db.VarChar(255)
+  orderDate     DateTime
+  shippingDate  DateTime?
+  deliveryDate  DateTime?
+  totalQuantity Int
+  isShipped     Boolean    @default(false)
+  isPending     Boolean    @default(true)
+  isDelivered   Boolean    @default(false)
+  totalPrice    Float
+  cartItems     CartItem[]
+  user          User       @relation(fields: [userId], references: [id])
+  userId        String
+  status        Status     @default(Pending)
+
+  @@map("orders")
+}
+
+model Pizza {
+  id          String     @id @default(uuid())
+  name        String     @db.VarChar(255)
+  topping     String
+  price       Float
+  quantity    Int        @default(10)
+  image       String     @db.VarChar(255)
+  description String     @db.VarChar(255)
+  cartItems   CartItem[]
+  user        User       @relation(fields: [userId], references: [id])
+  userId      String
+
+  @@map("pizzas")
+}
+
+enum Role {
+  User
+  Staff
+  Admin
+}
+
+enum Status {
+  Delivered
+  Pending
+  Shipped
+}
+
+enum Gender {
+  Female
+  Male
+}
+
+enum AddressType {
+  Home
+  Mailing
+  Same
+}
+
