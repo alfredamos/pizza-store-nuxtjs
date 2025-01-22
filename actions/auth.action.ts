@@ -1,3 +1,4 @@
+import { signIn } from "#auth";
 import { ChangePasswordModel } from "@/models/changePassword.model";
 import { EditProfileModel } from "@/models/editProfile.model";
 import { LoginModel } from "@/models/login.model";
@@ -6,10 +7,11 @@ import { UserInfoModel } from "@/models/userInfo.model";
 import { UserRoleChangeModel } from "@/models/userRoleChange.model";
 import { authDb } from "~/db/auth.db";
 
-export async function changePasswordAction(formData: FormData) {
+export async function changePasswordAction(changePasswordModel: ChangePasswordModel) {
   //----> Get the payload.
   const { email, confirmPassword, oldPassword, newPassword } =
-    Object.fromEntries(formData) as unknown as ChangePasswordModel;
+    changePasswordModel;
+
   //----> Change the password and store the updated user credentials in the database.
   return await authDb.changePassword({
     email,
@@ -19,10 +21,9 @@ export async function changePasswordAction(formData: FormData) {
   });
 }
 
-export async function editProfileAction(formData: FormData) {
+export async function editProfileAction(editProfileModel: EditProfileModel) {
   //----> Get the edit-profile from form data.
-  const { address, name, email, phone, image, gender, password } =
-    Object.fromEntries(formData) as unknown as EditProfileModel;
+  const { address, name, email, phone, image, gender, password } = editProfileModel;
   //----> edit user profile and store it in the database.
   console.log({ address, name, email, phone, image, gender, password });
 
@@ -47,18 +48,18 @@ export async function loginAction(formData: FormData) {
   //----> Destructure formData.
   const { email, password } = loginCredentials;
   //----> Login the user in.
-  /* return await signIn("credentials", {
+   return await signIn("credentials", {
     email,
     password,
     redirect: false,
-  }); */
+  }); 
 }
 
 export async function logoutAction() {
   //await signOut({ redirect: true });
 }
 
-export async function signupAction(formData: FormData) {
+export async function signupAction(signupModel: SignupModel) {
   //----> Get the user credentials from the request.
   const {
     address,
@@ -69,7 +70,7 @@ export async function signupAction(formData: FormData) {
     confirmPassword,
     password,
     gender,
-  } = Object.fromEntries(formData) as unknown as SignupModel;
+  } = signupModel;
 
   //----> Store the new user credentials in the database.
   const newUser = await authDb.signup({
